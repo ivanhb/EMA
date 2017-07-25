@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript" src="static/vis/dist/vis.js"></script>
+
+<link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+<link href="static/vis/dist/vis.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="static/semantic/dist/semantic.min.css">
+<script src="static/semantic/dist/semantic.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<link href="static/main.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="static/util.js"></script>
+<script type="text/javascript" src="static/mainGUI.js"></script>
+<script type="text/javascript" src="static/mainModel.js"></script>
+
+<!--
+SNA .js modules: Analysis, Filtering, Visualization, and Controller
+-->
+<script type="text/javascript" src="static/sna/visualization.js"></script>
+<script type="text/javascript" src="static/sna/filtering.js"></script>
+<script type="text/javascript" src="static/sna/analysis.js"></script>
+<script type="text/javascript" src="static/sna/controller.js"></script>
+
+<!--
+EAA .js modules: Analysis, Filtering, Visualization, and Controller
+-->
+<script type="text/javascript" src="static/eaa/visualization.js"></script>
+<script type="text/javascript" src="static/eaa/filtering.js"></script>
+<script type="text/javascript" src="static/eaa/analysis.js"></script>
+<script type="text/javascript" src="static/eaa/controller.js"></script>
+
+<script type="text/javascript" src="static/mainInfoSec.js"></script>
+<script type="text/javascript" src="static/main.js"></script>
+
+
+
+</head>
+<body>
+<div id="allBody">
+
+    <div id="loaderDiv" class="ui active inverted dimmer" style="width: 100%;height: 100%;">
+        <div id="loaderContainer" style="position: relative; top: 10%;">
+                <div class="ui big text loader" id="loaderIcon">
+                    Loading the data
+                </div>
+        </div>
+
+        <div id="textualEntry" class="ui card" style="position: relative;margin: auto;width: 70%; top: 20%; background-color: #f2f2f2; border: 0.5px solid lightgray;" align = "left">
+            <div class="ui normal text" style="width: 95%; margin: 0 auto;">
+                <br/><p class="inlineText">This tool will drive you through a forensic data analysis of the demo uploaded <p class="inlineText" style="color: MediumSeaGreen; font-weight: bold;">dataset of smith-m from Enron.</p>
+                After the loading and initial data processing comes to an end the system will start by showing a graph network built on the relathionships of smith-ms contacts:<p class="inlineText" style="color: SteelBlue; font-weight: bold;">Relationships network</p>.
+                The framework guarantee 3 more data visualizations: <br/><br/>
+                <p class="inlineText"><p class="inlineText" style="color: SteelBlue; font-weight: bold;">Messages traffic network:</p> a directed graph to show the messages traffic and direction (source and target) <br/><br/>
+                <p class="inlineText"><p class="inlineText" style="color: SteelBlue; font-weight: bold;">Concepts:</p> a number of concepts built according to the textual content in the emails <br/><br/>
+                <p class="inlineText"><p class="inlineText" style="color: SteelBlue; font-weight: bold;">Word frequency:</p> a 2D graphic representation of words occurrences for different periods of time <br/><br/>
+                The data to visualize could be filtered using the filters above the view panel and the time range slider below it, these options are available only when visualizing the graph network.
+                Along with filters nodes and edges style could be adopted according to the type of information we want to visualize, this is done by clicking on the gear button on the top left corner of the view. <br>
+                At the right side users have the ability to select what kind of information they want to see using the two tabs on the top,
+                according to that decision the system will generate the corresponding information below. Some elements in the info panel are selectable for a further navigation.
+            </div>
+            <div>&nbsp;</div>
+            <div id="buttonClose"></div>
+        </div>
+    </div>
+
+    <div id="stuck-body">
+                <div id="infoPopup" class="ui card" style="position: absolute; margin:10% auto; margin-left: 2%; z-index: 10; width: 75%; visibility: hidden; overflow-y: scroll; overflow-x: hidden; background-color: #f2f2f2; border: 0.5px solid lightgray;"></div>
+                <div id="popupMsgs" class="ui card" style="position: absolute; margin:2% auto; margin-left: 2%; z-index: 10; width: 60%; height: 85%; visibility: hidden; overflow-y: scroll; overflow-x: hidden; background-color: #f2f2f2; border: 0.5px solid lightgray;">
+                        <div class="content">
+                            <div id="popupMsgsHeader" class="header">Subject of email</div>
+                            <div id="popupMsgsHeader2" class="meta">All related messages</div>
+                            <div id="popupMsgsContent" class="description"></div>
+                        </div>
+                        <div id="buttonClose">
+                                <div class="ui two bottom attached buttons"><div class="ui large button" onclick="document.getElementById('popupMsgs').style.visibility = 'hidden';"><i class="icon Remove"></i>Close</div></div>
+                        </div>
+                </div>
+
+                <div id="searchBar">
+                    <div id="searchBox" style="display: inline-block; vertical-align: top;">
+
+                        <div class="inline filter ui mini input" id="contactSearch" >
+                        <input id="textfield0"  type="text" style="border-color: #A0A0A0">
+                        </div>
+
+                        <div class="inline filter ui mini input" id="subjectSearch" >
+                        <input id="textfield1"  type="text" style="border-color: #A0A0A0">
+                        </div>
+
+
+                        <div class="inline filter slider" id="slider1Slider">
+                            <div style="white-space:nowrap;" >
+                                <label class="label-input inlineText" id= "lbl-slider1" for="amount-slider1">Min nodes value </label>
+                                <div class="inlineText" data-tooltip="Node value is the sum of all connected edges weight" data-position="bottom center" style="z-index: 1;"><i class="icon medium grey help circle"></i></div>
+                                <div class="inlineText"><input class="input-text" type="text" id="amount-slider1" readonly style="color: #A0A0A0; position: relative; margin-left: 10%; width: 18%; border: 0; font-size: medium; font-weight:bold;"/></div>
+                            </div>
+                            <div style="white-space:nowrap;">
+                                <div class="slider" id="slider1" for="lblMax-slider1" style="float: left; margin-top: 2.5%; width: 65%; z-index: 0;"></div>
+                                <label class="ui-slider-legend" id= "lblMax-slider1" >[Max]</label>
+                            </div>
+                        </div>
+
+                        <div class="inline filter slider" id="slider0Slider" >
+                            <div style="white-space:nowrap;">
+                                <label class="label-input" id= "lbl-slider0" for="amount-slider0"> Min edges weight </label>
+                                <div class="inlineText" data-tooltip="The edge weight equals the number of emails between two nodes" data-position="bottom center" style="z-index: 1;"><i class="icon medium grey help circle"></i></div>
+                                <input class="input-text" type="text" id="amount-slider0" readonly style="color: #A0A0A0;position: relative; margin-left: 10%; width: 25%; border:0; font-size: medium; font-weight:bold;">
+                            </div>
+                            <div style="white-space:nowrap;">
+                                <div class="slider" id="slider0" for="lblMax-slider0" style="float: left; margin-top: 2.5%; width: 65%; z-index: 0;"></div>
+                                <label class="ui-slider-legend" id= "lblMax-slider0">[Max]</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+    </div>
+
+    <div id="infoPanel">
+        <div id="infoSelections" style="vertical-align: top; border-bottom: 0.5px solid gray;">
+            <div id="infoMenu1" class="ui small buttons infoMenu1" style="width: 100%;">
+                    <button id="selected" class="ui inverted button infoMenu1" onclick="objInfoView.base='selected'; infosModule.genInfos()">Selected</button>
+                    <div class="or"></div>
+                    <button id="filtered" class="ui inverted button infoMenu1" onclick="objInfoView.base='filtered'; infosModule.genInfos()">Filtered</button>
+                    <div class="or"></div>
+                    <button id="all" class="ui inverted button infoMenu1" onclick="objInfoView.base ='all'; infosModule.genInfos()">All</button>
+            </div>
+
+            <div id="infoMenu2" class="ui small buttons infoMenu2" style="margin-top: 0.5%; width: 100%">
+                    <button class="ui inverted button infoMenu2" id="contacts" onclick="objInfoView.category = 'contacts'; infosModule.genInfos()">Contacts</button>
+                    <div class="or"></div>
+                    <button class="ui inverted button infoMenu2" id="links" onclick="objInfoView.category = 'links'; infosModule.genInfos()">Links</button>
+                    <div class="or"></div>
+                    <button class="ui inverted button infoMenu2" id="network" onclick="objInfoView.category = 'network'; infosModule.genInfos()">Network</button>
+            </div>
+        </div>
+        <div id="infos">
+            <div id="allInfos" ng-app="infosApp">
+
+                <div id="infoTab" class="ui relaxed list" ng-controller="infosController as rowList">
+                    <div id='{{row.id}}' class="item event" ng-init="setOnInit()" ng-repeat="row in rowList.rows" ng-click="setSelected(row)" value='{{row.name}}' ng-mouseover="setOver(row)" ng-mouseleave="setOutOver(row)">
+
+                        <div class='{{row.styleMainClass.type}}' ng-style="{'display': row.styleMainClass.display, 'margin-right': row.styleMainClass.right}">
+                            <div class='{{row.classStyle}}' value='{{row.name}}' ng-style="{fontSize: row.styleCssName.fontSize, backgroundColor: row.styleCssName.backgroundColor, color: row.styleCssName.color, border: row.styleCssName.border, borderBottom: row.styleCssName.borderBottom, cursor: row.styleCssName.cursor, 'margin-right': row.styleCssName.right}">
+                                <p class="inlineText" id="nameRow">{{row.name}}</p>
+                                <div id="{{row.infoId}}" class="inlineText helpIcon" style="position: relative; left: -1%;" data-content="{{row.infoVal}}" data-position="{{row.infoPos}}"><i class="{{row.infoClass}}"></i></div>
+                                <div value='{{row.value}}' class="inlineText" ng-style="{fontSize: row.styleCssVal.fontSize, backgroundColor: row.styleCssVal.backgroundColor, color: row.styleCssVal.color, border: row.styleCssVal.border, cursor: row.styleCssVal.cursor,'margin-right': row.styleCssVal.right}">
+                                <p class="inlineText" id="valueRow">{{row.value}}</p></div>
+                            </div>
+                            <div class='{{row.classStyle2nd}}' value='{{row.name2nd}}' ng-style="{fontSize: row.styleCssName2nd.fontSize, backgroundColor: row.styleCssName2nd.backgroundColor, color: row.styleCssName2nd.color, border: row.styleCssName2nd.border, borderBottom: row.styleCssName2nd.borderBottom, cursor: row.styleCssName2nd.cursor, 'margin-right': row.styleCssName2nd.right}">
+                                <p class="inlineText" id="nameRow">{{row.name2nd}}</p>
+                                <div id="{{row.infoId2nd}}" class="inlineText helpIcon" style="position: relative; left: -1%;" data-content="{{row.infoVal2nd}}" data-position="{{row.infoPos2nd}}"><i class="{{row.infoClass2nd}}"></i></div>
+                                <div value='{{row.value2nd}}' class="inlineText" ng-style="{fontSize: row.styleCssVal2nd.fontSize, backgroundColor: row.styleCssVal2nd.backgroundColor, color: row.styleCssVal2nd.color, border: row.styleCssVal2nd.border, cursor: row.styleCssVal2nd.cursor, 'margin-right': row.styleCssVal2nd.right}">
+                                <p class="inlineText" id="valueRow">{{row.value2nd}}</p></div>
+                            </div>
+                        </div>
+
+                        <div class="{{row.iconClass}}" ng-style="{'display': row.styleCssIcon.display, '-webkit-transform': row.styleCssIcon.translate, color: row.styleCssIcon.color, cursor: row.styleCssIcon.cursor, 'margin-right': row.styleCssIcon.right}">{{row.iconValue}}</div>
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div id="graphVis">
+            </div>
+            <!--<div>&nbsp;</div>-->
+        </div>
+    </div>
+
+
+    <div id="graphPanel">
+        <i class="icon big grey help circle" onclick="onIconInfo();" id="infoIconVis"></i>
+        <div class="ui top attached" id="panel0"></div>
+        <div class="dropDownSet" id="panel0SM">
+                    <div class="ui small dropdown item">
+                        <i class="icon big grey settings"><i class="dropdown grey icon"></i> </i>
+                        <div class="ui vertical menu">
+                        <a class="item">
+                            <div class="ui form">
+                                <div id="undirected-nodesSizeRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Nodes size: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="sumEdgesW" name="undirected-nodeSize" checked="checked" type="radio">
+                                      <label>Sum Edges-weight</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="degree" name="undirected-nodeSize" type="radio">
+                                      <label>Degree</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="undirected-nodeSize" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div id="undirected-edgesSizeRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Edges size: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="weight" name="undirected-edgeSize" checked="checked" type="radio">
+                                      <label>Edge weight</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="numSubjects" name="undirected-edgeSize" type="radio">
+                                      <label>Number of subjects</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="undirected-edgeSize" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div id="undirected-nodesColorRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Nodes color: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="cluster" name="undirected-nodeColor" type="radio">
+                                      <label>Cluster</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="domain" name="undirected-nodeColor" type="radio">
+                                      <label>Domain</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="undirected-nodeColor" checked="checked" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div id="undirected-edgesColorRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Edges color: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="cluster" name="undirected-edgeColor" type="radio">
+                                      <label>Cluster</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="undirected-edgeColor" checked="checked" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                            </div>
+                        </a>
+                        </div>
+                    </div>
+        </div>
+        <div class="ui top attached" id="panel1"></div>
+        <div class="dropDownSet" id="panel1SM">
+                    <div class="ui small dropdown item">
+                        <!--Graph-Network <br> style options <i class="dropdown icon"></i> -->
+                        <i class="icon big grey settings"><i class="dropdown grey icon"></i> </i>
+                        <div class="ui vertical menu">
+                        <a class="item">
+                            <div class="ui form">
+                                <div id="directed-nodesSizeRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Nodes size: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="sumEdgesW" name="directed-nodeSize" checked="checked" type="radio">
+                                      <label>Sum Edges-weight</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="sumInEdgesW" name="directed-nodeSize" type="radio">
+                                      <label>Sum inEdges-weight</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="sumOutEdgesW" name="directed-nodeSize" type="radio">
+                                      <label>Sum outEdges-weight</label>
+                                    </div>
+                                  </div>
+                                </div>
+                            <div id="directed-nodesSizeRow" class="inline fields">
+                                <label style="font-size: large; color: #0099cc; visibility: hidden;">Nodes size: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="degree" name="directed-nodeSize" type="radio">
+                                      <label>Degree</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="inDegree" name="directed-nodeSize" type="radio">
+                                      <label>In Degree</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="outDegree" name="directed-nodeSize" type="radio">
+                                      <label>Out Degree</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="directed-nodeSize" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div id="directed-edgesSizeRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Edges size: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="weight" name="directed-edgeSize" checked="checked" type="radio">
+                                      <label>Edge weight</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="numSubjects" name="directed-edgeSize" type="radio">
+                                      <label>Number of subjects</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="directed-edgeSize" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div id="directed-nodesColorRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Nodes color: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="cluster" name="directed-nodeColor" type="radio">
+                                      <label>Cluster</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="domain" name="directed-nodeColor" type="radio">
+                                      <label>Domain</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="directed-nodeColor" checked="checked" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div id="directed-edgesColorRow" class="inline fields">
+                                  <label style="font-size: large; color: #0099cc;">Edges color: </label>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="cluster" name="directed-edgeColor" type="radio">
+                                      <label>Cluster</label>
+                                    </div>
+                                  </div>
+                                  <div class="field">
+                                    <div class="ui radio checkbox">
+                                      <input type="checkbox" value="none" name="directed-edgeColor" checked="checked" type="radio">
+                                      <label>None</label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                            </div>
+                        </a>
+                        </div>
+                    </div>
+        </div>
+        <div class="ui top attached" id="panel2"></div>
+        <div class="dropDownSet" id="panel2SM"></div>
+        <div class="ui top attached" id="panel3"></div>
+        <div class="dropDownSet" id="panel3SM"></div>
+        <div class="ui small bottom attached tabular menu" style="z-index: 0;" id="switchPanelDiv">
+            <a class="item" style="z-index: 0;" id="tabMenu0" onclick="guiUtil.switchPanel('panel0')">Relationships network
+            <div class="inlineText helpIcon" style="position: relative; top: 4%; left: 1.1%;" data-content="A graph network to visualize the relationships between the contacts" data-position="top left"><i class="icon medium grey help circle"></i></div></a>
+            <a class="item" style="z-index: 0;" id="tabMenu1" onclick="guiUtil.switchPanel('panel1')">Messages traffic network
+            <div class="inlineText helpIcon" style="position: relative; top: 4%; left: 1.1%;" data-content="A directed graph to show the messages traffic and direction (source and target)" data-position="top left"><i class="icon medium grey help circle"></i></div></a>
+            <a class="item" style="z-index: 0;" id="tabMenu2" onclick="guiUtil.switchPanel('panel2')">Concepts
+            <div class="inlineText helpIcon" style="position: relative; top: 4%; left: 1.1%;" data-content="A number of concepts built according to the textual content in emails" data-position="top left"><i class="icon medium grey help circle"></i></div></a>
+            <a class="item" id="tabMenu3" style="border-bottom-right-radius: 7px;" onclick="guiUtil.switchPanel('panel3')">Words frequency
+            <div class="inlineText helpIcon" style="position: relative; top: 4%; left: 1.1%;" data-content="A graphic representation of words frequencies for different periods of time" data-position="top left"><i class="icon medium grey help circle"></i></div></a>
+        </div>
+    </div>
+
+
+    <div id="timelineBar">
+        <div id="timeSliderDiv">
+                <input  class="ui big label" type="text" id="amount-slider2" value="" readonly style="float:right; width: 50%; border:0; background-color: transparent;">
+                <br/><div class="slider" id="slider2" style="width: 95%; margin: 1.5% auto;"></div>
+        </div>
+    </div>
+
+
+    <div id="credits">
+        <font color=#9E9E9E style='font-size:small'>   *The data uploaded are a sample email dataset of smith-m from Enron.</font>
+    </div>
+
+
+
+
+</div>
+</body>
+</html>
