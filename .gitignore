@@ -1,0 +1,4 @@
+*.pyc
+.idea/
+*.orig
+virtual/
