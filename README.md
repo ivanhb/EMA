@@ -26,3 +26,7 @@ The image legendOnion.png shows the general Framework architecture. Each differe
 The framework architecture is represented in an onion form with different layers. The idea is to make each component and layer independent. This will make the framework more flexible for modifications or improvements to each individual part of it, as well as for the integration of new analysis. 
 
 For example static/sna directory contains the Social Network Analysis component. Each layer of SNA is a different .js file: analysis, filtering and visualization. In addition we have a controller.js file which is the manager and the the main handler to call the procedures of SNA.
+
+![](legendOnion.png?raw=true "Framework Architecture")
+
+
