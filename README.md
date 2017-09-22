@@ -21,6 +21,10 @@ The image legendOnion.png shows the general Framework architecture. Each differe
 2. unzip semantic.zip inside static/
 3. move all the directory of the project into your local web server directory 
 4. open your browser and type (http://localhost/emailAnalytics/index.html)
+5. in the following figure we can see: (1) Filters, (2) View options, (3) Help info, (4)
+Panel tabs, (5) Time filter, (6) Info menus, (7) Info section
+
+![](gui02.png?raw=true "Framework gui")
 
 ## Framework structure :
 The framework architecture is represented in an onion form with different layers. The idea is to make each component and layer independent. This will make the framework more flexible for modifications or improvements to each individual part of it, as well as for the integration of new analysis. 
